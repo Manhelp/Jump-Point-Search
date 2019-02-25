@@ -1,0 +1,18 @@
+centos 7
+
+$ git clone https://github.com/protocolbuffers/protobuf.git
+$ cd protobuf
+$ git submodule update --init --recursive
+$ ./autogen.sh
+
+$ ./configure
+$ make
+$ make check
+$ sudo make install
+$ sudo ldconfig /usr/local/lib # refresh shared library cache.
+
+默认安装目录：
+/usr/local/bin
+/usr/local/lib
+
+
