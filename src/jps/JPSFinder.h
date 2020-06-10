@@ -16,7 +16,6 @@
 #define m_max(a,b)            (((a) > (b)) ? (a) : (b))
 #define m_min(a,b)            (((a) < (b)) ? (a) : (b))
 
-class TestMap;
 
 struct CellData
 {
