@@ -10,9 +10,11 @@ OUT := bin/jpsfinder
 LIB := /usr/local/lib/libprotobuf.a
 
 SOURCE_DIR := src
+SOURCE_JPS_DIR := $(SOURCE_DIR)/jps
+INCLUDE := -I$(SOURCE_JPS_DIR) -I$(SOURCE_DIR)
 OBJ_DIR := bin/obj
 
-SOURCE_CPP_DIR := $(wildcard $(SOURCE_DIR)/*.cc)
+SOURCE_CPP_DIR := $(wildcard $(SOURCE_JPS_DIR)/*.cc $(SOURCE_DIR)/*.cc)
 OBJ := $(patsubst %.cc, $(OBJ_DIR)/%.o, $(SOURCE_CPP_DIR))
 
 
@@ -21,12 +23,13 @@ all: build
 build: before out after
 
 before: 
-	test -d $(OBJ_DIR)/src || mkdir -p $(OBJ_DIR)/src
+	test -d $(OBJ_DIR)/$(SOURCE_DIR) || mkdir -p $(OBJ_DIR)/$(SOURCE_DIR)
+	test -d $(OBJ_DIR)/$(SOURCE_JPS_DIR) || mkdir -p $(OBJ_DIR)/$(SOURCE_JPS_DIR)
 
 out: $(OBJ)
 
 $(OBJ): $(OBJ_DIR)/%.o:%.cc
-	$(GXX) $(CFLAGS) -c $< -o $@
+	$(GXX) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 after:
 	$(GXX) -o $(OUT) $(OBJ) $(LIB)  $(LDFLAGS)

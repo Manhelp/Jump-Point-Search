@@ -1,24 +1,8 @@
 #include "TestMap.h"
 #include <time.h>
 
-#include "test.pb.h"
-
 int main(int argc, char* argv[])
 {
-    
-    TestMsg test;
-    test.set_id(1);
-    test.set_name("jingyilu");
-    test.set_dis("test");
-    
-    std::string strdis;
-    test.SerializeToString(&strdis);
-
-    printf("-->:%d %s\n",(int)strdis.size(), strdis.c_str());
-    
-    return 0;
-
-
     TestMap map;
     std::string filename = "test";
     map.loadcsv(filename);
@@ -26,7 +10,7 @@ int main(int argc, char* argv[])
     int run_times = 100000;
     int dx = 59;
     int dy = 45;
-    map.jps_finder_.init(&map);
+    map.jps_finder_.init(map.cell_datas_, map.width_, map.heigth_);
 
     clock_t begin_ck = clock();
     printf("run times:%d, start clock:%ld ",run_times, begin_ck);
@@ -66,8 +50,11 @@ int main(int argc, char* argv[])
                 }
             }
         }
-
-        printf("%d", f);
+        if(f == 8) {
+            printf(" ");
+        } else {
+            printf("%d", f);
+        }
     }
 
     getchar();
