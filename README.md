@@ -6,3 +6,10 @@
 具体用法看 测试用例, 欢迎交流!
 
 欢迎加群：153354804
+
+add cmake
+eg: 
+make build
+cd build
+cmake ../src
+make
