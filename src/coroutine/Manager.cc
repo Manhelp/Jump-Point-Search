@@ -10,11 +10,12 @@ thread_manager::thread_manager() {
     m_logic_thread.detach();
 }
 
-coroutine_task thread_manager::async_task(int count) {
+coroutine_task thread_manager::async_task() {
     // generator
-    std::cout << " begin run " << count << " thread id " << std::this_thread::get_id() << std::endl;
+    auto index = m_global_index;
+    std::cout << " begin run " << index << " thread id " << std::this_thread::get_id() << std::endl;
     co_await thread_manager::await_suspend_handle(*this);
-    std::cout << " continue run " << count << " thread id " << std::this_thread::get_id() << std::endl;
+    std::cout << " continue run " << index << " thread id " << std::this_thread::get_id() << std::endl;
 }
 
 jthread_awaitable thread_manager::await_suspend_handle(thread_manager& manager) {
@@ -25,10 +26,9 @@ void thread_manager::main_thread_worker(thread_manager* manager) {
     while (true)
     {
         // genertor
-        if(manager->m_global_index == 0) {
-            for(int i = 1; i < 100; ++i) {
-                manager->async_task(i);
-            }
+        if(manager->m_gen_task_tick < time(nullptr)) {
+            manager->m_gen_task_tick = time(nullptr) + 1;
+            manager->async_task();
         }
 
         // cosume
@@ -46,7 +46,7 @@ void thread_manager::main_thread_worker(thread_manager* manager) {
         }
             
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     
 }
@@ -65,7 +65,7 @@ void thread_manager::logic_thread_worker(thread_manager* manager) {
                 // sync
                 // do something
                 // .......
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 // finish
 
                 do {
@@ -78,6 +78,6 @@ void thread_manager::logic_thread_worker(thread_manager* manager) {
             manager->m_logic_handles.clear();
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
