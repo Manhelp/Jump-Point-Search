@@ -26,13 +26,21 @@ public:
     std::jthread m_main_thread;
     std::jthread m_logic_thread;
 
-    std::mutex m_main_mutex;
+
+
+    /**
+     * main thread write to m_logic_cache_handles
+     * logic thread swap m_logic_cache_handles to m_logic_handles
+     * logic thread write to m_main_cache_handles
+     * main thread swap m_main_cache_handles to m_main_handles
+     */
     std::unordered_map<uint, std::coroutine_handle<>> m_main_handles;
     std::unordered_map<uint, std::coroutine_handle<>> m_main_cache_handles;
-
-    std::mutex m_logic_mutex;
     std::unordered_map<uint, std::coroutine_handle<>> m_logic_handles;
     std::unordered_map<uint, std::coroutine_handle<>> m_logic_cache_handles;
+
+    // main thread read <---> logic thread write
+    std::unordered_map<uint, uint> m_results;
 };
 
 struct jthread_awaitable : public coroutine_awaitable {
@@ -40,8 +48,7 @@ struct jthread_awaitable : public coroutine_awaitable {
 
     jthread_awaitable(thread_manager* manager) : m_manager{manager} {}
     void await_suspend(std::coroutine_handle<> handle) {
-        std::lock_guard<std::mutex> guard(m_manager->m_logic_mutex);
-        m_manager->m_logic_cache_handles[m_manager->m_global_index] = handle;
+        m_manager->m_logic_cache_handles.emplace(std::make_pair(m_manager->m_global_index, handle));
 
         std::cout << " input logic cache " << m_manager->m_global_index << " thread id " << std::this_thread::get_id() << std::endl;
 
