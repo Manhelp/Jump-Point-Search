@@ -52,6 +52,8 @@ void thread_manager::main_thread_worker(thread_manager* manager) {
             for(auto itor = manager->m_main_handles.begin(); itor != manager->m_main_handles.end(); ++itor) {
                 // std::cout << " resume " << itor->first << " thread id " << std::this_thread::get_id() << std::endl;
                 itor->second->m_handle.resume();
+                
+                manager->release(itor->second);
             }
             manager->m_main_handles.clear();
         }
