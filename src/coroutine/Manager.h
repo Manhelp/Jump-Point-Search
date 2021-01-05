@@ -7,9 +7,17 @@
 #include "Coroutine.h"
 #include <unordered_map>
 #include <mutex>
-#include "Generator.h"
+#include <memory>
 
 struct jthread_awaitable;
+
+struct result_data {
+    int64_t m_index;
+    int64_t m_data;
+    std::coroutine_handle<> m_handle;
+    
+    result_data(int64_t index, std::coroutine_handle<> handle) : m_index{index}, m_handle{handle} {}
+};
 
 class thread_manager {
 public:
@@ -35,10 +43,10 @@ public:
      * logic thread write to m_main_cache_handles
      * main thread swap m_main_cache_handles to m_main_handles
      */
-    std::unordered_map<int64_t, std::coroutine_handle<>> m_main_handles;
-    std::unordered_map<int64_t, std::coroutine_handle<>> m_main_cache_handles;
-    std::unordered_map<int64_t, std::coroutine_handle<>> m_logic_handles;
-    std::unordered_map<int64_t, std::coroutine_handle<>> m_logic_cache_handles;
+    std::unordered_map<int64_t, std::shared_ptr<result_data>> m_main_handles;
+    std::unordered_map<int64_t, std::shared_ptr<result_data>> m_main_cache_handles;
+    std::unordered_map<int64_t, std::shared_ptr<result_data>> m_logic_handles;
+    std::unordered_map<int64_t, std::shared_ptr<result_data>> m_logic_cache_handles;
 
     // main thread read <---> logic thread write
     std::unordered_map<int64_t, int64_t> m_results;
@@ -50,9 +58,11 @@ struct jthread_awaitable : public coroutine_awaitable {
     jthread_awaitable(thread_manager* manager) : m_manager{manager} {}
     void await_suspend(std::coroutine_handle<> handle) {
 
+        std::shared_ptr<result_data> data = std::make_shared<result_data>(m_manager->m_global_index, handle);
+        
         {
             std::lock_guard<std::mutex> guard(m_manager->m_logic_mutex);
-            m_manager->m_logic_cache_handles.emplace(std::make_pair(m_manager->m_global_index, handle));
+            m_manager->m_logic_cache_handles.emplace(std::make_pair(data->m_index, data));
         }
         
 

@@ -16,18 +16,12 @@ coroutine_task thread_manager::async_task() {
     // std::cout << " begin run " << index << " thread id " << std::this_thread::get_id() << std::endl;
     co_await thread_manager::await_suspend_handle(*this);
 
-    auto itor = m_results.find(index);
-    if(itor != m_results.end()) {
-
-        std::cout << " continue run " << index << " result " << itor->second << " thread id " << std::this_thread::get_id() << std::endl;
-        
-        m_results.erase(itor);
+    auto itor = m_main_handles.find(index);
+    if(itor != m_main_handles.end()) {
+        if(index % 1000000 == 0) {
+            std::cout << " continue run " << index << " result " << itor->second->m_data << " thread id " << std::this_thread::get_id() << std::endl;
+        }
     }
-
-    if(index % 1000000 == 0) {
-        std::cout << " continue run " << index << " thread id " << std::this_thread::get_id() << std::endl;
-    }
-    
 }
 
 jthread_awaitable thread_manager::await_suspend_handle(thread_manager& manager) {
@@ -57,7 +51,7 @@ void thread_manager::main_thread_worker(thread_manager* manager) {
 
             for(auto itor = manager->m_main_handles.begin(); itor != manager->m_main_handles.end(); ++itor) {
                 // std::cout << " resume " << itor->first << " thread id " << std::this_thread::get_id() << std::endl;
-                itor->second.resume();
+                itor->second->m_handle.resume();
             }
             manager->m_main_handles.clear();
         }
@@ -83,6 +77,8 @@ void thread_manager::logic_thread_worker(thread_manager* manager) {
                 // do something
                 // .......
                 // std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                itor->second->m_data = 888;
+                // .......
                 // finish
 
                 {
