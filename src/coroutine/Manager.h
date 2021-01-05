@@ -13,11 +13,11 @@ struct jthread_awaitable;
 class thread_manager {
 public:
     thread_manager();
-    coroutine_task init(int count = 0);
+    coroutine_task async_task(int count = 0);
 public:
     static void main_thread_worker(thread_manager* manager);
     static void logic_thread_worker(thread_manager* manager);
-    static jthread_awaitable switch_to_new_thread(thread_manager& manager);
+    static jthread_awaitable await_suspend_handle(thread_manager& manager);
 public:
     std::jthread m_main_thread;
     std::jthread m_logic_thread;
@@ -38,6 +38,7 @@ struct jthread_awaitable : public coroutine_awaitable {
     void await_suspend(std::coroutine_handle<> handle) {
         std::lock_guard<std::mutex> guard(m_manager->m_logic_mutex);
         m_manager->m_logic_cache_handles[++m_manager->m_global_index] = handle;
-        std::cout << " input logic cache " << m_manager->m_global_index << std::endl;
+
+        std::cout << " input logic cache " << m_manager->m_global_index << " thread id " << std::this_thread::get_id() << std::endl;
     }
 };

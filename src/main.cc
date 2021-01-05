@@ -100,17 +100,6 @@ int main(int argc, char* argv[])
 
     std::cout << "--------------" << std::endl;
 
-    // sql thread
-    std::jthread sqlThead([]{
-        while(true) {
-
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-
-    });
-    sqlThead.detach();
-
     // main thread
     while(true) {
 

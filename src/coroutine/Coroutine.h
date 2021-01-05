@@ -21,6 +21,7 @@ struct coroutine_awaitable
 struct coroutine_task
 {
 	struct promise_type {
+		static coroutine_task get_return_object_on_allocation_failure() { return {}; }
 		coroutine_task get_return_object() { return {}; }
 		std::suspend_never initial_suspend() { return {}; }
 		std::suspend_never final_suspend() noexcept { return {}; }

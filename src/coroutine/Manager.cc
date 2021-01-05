@@ -10,14 +10,14 @@ thread_manager::thread_manager() {
     m_logic_thread.detach();
 }
 
-coroutine_task thread_manager::init(int count) {
+coroutine_task thread_manager::async_task(int count) {
     // generator
     std::cout << " begin run " << count << " thread id " << std::this_thread::get_id() << std::endl;
-    co_await thread_manager::switch_to_new_thread(*this);
+    co_await thread_manager::await_suspend_handle(*this);
     std::cout << " continue run " << count << " thread id " << std::this_thread::get_id() << std::endl;
 }
 
-jthread_awaitable thread_manager::switch_to_new_thread(thread_manager& manager) {
+jthread_awaitable thread_manager::await_suspend_handle(thread_manager& manager) {
     return jthread_awaitable{&manager};
 }
 
@@ -27,7 +27,7 @@ void thread_manager::main_thread_worker(thread_manager* manager) {
         // genertor
         if(manager->m_global_index == 0) {
             for(int i = 1; i < 100; ++i) {
-                manager->init(i);
+                manager->async_task(i);
             }
         }
 
