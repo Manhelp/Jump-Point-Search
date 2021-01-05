@@ -20,13 +20,14 @@ public:
     static void logic_thread_worker(thread_manager* manager);
     static jthread_awaitable await_suspend_handle(thread_manager& manager);
 public:
-    int m_global_index = 0;
+    int64_t m_global_index = 0;
     int64_t m_gen_task_tick = 0;
 
     std::jthread m_main_thread;
     std::jthread m_logic_thread;
 
-
+    std::mutex m_main_mutex;
+    std::mutex m_logic_mutex;
 
     /**
      * main thread write to m_logic_cache_handles
@@ -34,13 +35,13 @@ public:
      * logic thread write to m_main_cache_handles
      * main thread swap m_main_cache_handles to m_main_handles
      */
-    std::unordered_map<uint, std::coroutine_handle<>> m_main_handles;
-    std::unordered_map<uint, std::coroutine_handle<>> m_main_cache_handles;
-    std::unordered_map<uint, std::coroutine_handle<>> m_logic_handles;
-    std::unordered_map<uint, std::coroutine_handle<>> m_logic_cache_handles;
+    std::unordered_map<int64_t, std::coroutine_handle<>> m_main_handles;
+    std::unordered_map<int64_t, std::coroutine_handle<>> m_main_cache_handles;
+    std::unordered_map<int64_t, std::coroutine_handle<>> m_logic_handles;
+    std::unordered_map<int64_t, std::coroutine_handle<>> m_logic_cache_handles;
 
     // main thread read <---> logic thread write
-    std::unordered_map<uint, uint> m_results;
+    std::unordered_map<int64_t, int64_t> m_results;
 };
 
 struct jthread_awaitable : public coroutine_awaitable {
@@ -48,9 +49,14 @@ struct jthread_awaitable : public coroutine_awaitable {
 
     jthread_awaitable(thread_manager* manager) : m_manager{manager} {}
     void await_suspend(std::coroutine_handle<> handle) {
-        m_manager->m_logic_cache_handles.emplace(std::make_pair(m_manager->m_global_index, handle));
 
-        std::cout << " input logic cache " << m_manager->m_global_index << " thread id " << std::this_thread::get_id() << std::endl;
+        {
+            std::lock_guard<std::mutex> guard(m_manager->m_logic_mutex);
+            m_manager->m_logic_cache_handles.emplace(std::make_pair(m_manager->m_global_index, handle));
+        }
+        
+
+        // std::cout << " input logic cache " << m_manager->m_global_index << " thread id " << std::this_thread::get_id() << std::endl;
 
         ++m_manager->m_global_index;
     }

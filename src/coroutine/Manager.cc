@@ -13,7 +13,7 @@ thread_manager::thread_manager() {
 coroutine_task thread_manager::async_task() {
     // generator
     auto index = m_global_index;
-    std::cout << " begin run " << index << " thread id " << std::this_thread::get_id() << std::endl;
+    // std::cout << " begin run " << index << " thread id " << std::this_thread::get_id() << std::endl;
     co_await thread_manager::await_suspend_handle(*this);
 
     auto itor = m_results.find(index);
@@ -23,6 +23,11 @@ coroutine_task thread_manager::async_task() {
         
         m_results.erase(itor);
     }
+
+    if(index % 1000000 == 0) {
+        std::cout << " continue run " << index << " thread id " << std::this_thread::get_id() << std::endl;
+    }
+    
 }
 
 jthread_awaitable thread_manager::await_suspend_handle(thread_manager& manager) {
@@ -36,7 +41,7 @@ void thread_manager::main_thread_worker(thread_manager* manager) {
         if(manager->m_gen_task_tick < time(nullptr)) {
             manager->m_gen_task_tick = time(nullptr) + 1;
 
-            for(int i = 0; i < 10; ++i) {
+            for(int i = 0; i < 1000000; ++i) {
                 manager->async_task();
             }
 
@@ -44,10 +49,14 @@ void thread_manager::main_thread_worker(thread_manager* manager) {
 
         // cosume
         if(!manager->m_main_cache_handles.empty()) {
-            manager->m_main_handles.swap(manager->m_main_cache_handles);
+            {
+                std::lock_guard<std::mutex> guard(manager->m_main_mutex);
+                manager->m_main_handles.swap(manager->m_main_cache_handles);
+            }
+            
 
             for(auto itor = manager->m_main_handles.begin(); itor != manager->m_main_handles.end(); ++itor) {
-                std::cout << " resume " << itor->first << " thread id " << std::this_thread::get_id() << std::endl;
+                // std::cout << " resume " << itor->first << " thread id " << std::this_thread::get_id() << std::endl;
                 itor->second.resume();
             }
             manager->m_main_handles.clear();
@@ -64,19 +73,25 @@ void thread_manager::logic_thread_worker(thread_manager* manager) {
     {
         // logic
         if(!manager->m_logic_cache_handles.empty()) {
-            manager->m_logic_handles.swap(manager->m_logic_cache_handles);
+            {
+                std::lock_guard<std::mutex> guard(manager->m_logic_mutex);
+                manager->m_logic_handles.swap(manager->m_logic_cache_handles);
+            }
             
             for(auto itor = manager->m_logic_handles.begin(); itor != manager->m_logic_handles.end(); ++itor) {
                 // sync
                 // do something
                 // .......
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                // std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 // finish
 
-                manager->m_main_cache_handles.emplace(std::make_pair(itor->first, itor->second));
-                manager->m_results.emplace(std::make_pair(itor->first, itor->first));
+                {
+                    std::lock_guard<std::mutex> guard(manager->m_main_mutex);
+                    manager->m_main_cache_handles.emplace(std::make_pair(itor->first, itor->second));
+                }
+                // manager->m_results.emplace(std::make_pair(itor->first, itor->first));
                 
-                std::cout << " finish logic operate " << itor->first << " thread id " << std::this_thread::get_id() << std::endl;
+                // std::cout << " finish logic operate " << itor->first << " thread id " << std::this_thread::get_id() << std::endl;
             }
 
             manager->m_logic_handles.clear();
