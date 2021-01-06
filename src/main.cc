@@ -2,12 +2,16 @@
 #include <time.h>
 #include "Coroutine.h"
 #include "Generator.h"
-#include "SwitchNewThread.h"
+#include "Manager.h"
 #include "Tutorial.h"
+#include <chrono>
+#include <vector>
+#include "Manager.h"
 
 int main(int argc, char* argv[])
 {
     // jsp
+    /*
     {
         TestMap map;
         std::string filename = "test";
@@ -64,7 +68,11 @@ int main(int argc, char* argv[])
         }
         std::cout << '\n';
     }
+    */
 
+    std::cout << "hardware_concurrency=" << std::thread::hardware_concurrency() << std::endl;
+
+    /*
     // tutorial
     // 创建一个任务
     test_task::ptr_t task = std::make_shared<test_task>(3);
@@ -74,18 +82,41 @@ int main(int argc, char* argv[])
     while (!fut.done()) {
         test_rpc_manager_run();
     }
-
+    */
     // switch to new thread
-    std::jthread out;
-    resuming_on_new_thread(out);
+    // resuming_on_new_thread();
 
     // generator
+    /*
     for (int i : range(-4, 8)) {
         std::cout << i << ' ';
     }
     std::cout << '\n';
+    */
 
 
+    thread_manager main_manager;
+    
+
+    std::cout << "--------------" << std::endl;
+
+    // sql thread
+    std::jthread sqlThead([]{
+        while(true) {
+
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
+    });
+    sqlThead.detach();
+
+    // main thread
+    while(true) {
+
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 
     getchar();
     return 0;

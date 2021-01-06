@@ -226,13 +226,15 @@ struct test_task_future {
         void await_resume() {
             if (data) {
                 ++data->status;
-                std::cout << std::setw(32) << __FUNCTION__ << std::setw(3) << ": " << __LINE__ << ": task " << data.get() << " resume to " << (data ? data->status : -1) << std::endl;
+                std::cout << std::setw(32) << __FUNCTION__ << std::setw(3) << ": " << 
+                    __LINE__ << ": task " << data.get() << " resume to " << (data ? data->status : -1) << std::endl;
             }
         }
 
         void await_suspend(handle h) {
             if (data) {
-                std::cout << std::setw(32) << __FUNCTION__ << std::setw(3) << ": " << __LINE__ << ": task " << data.get() << " suspend test_task_future::handle from " << (data ? data->status : -1) <<
+                std::cout << std::setw(32) << __FUNCTION__ << std::setw(3) << ": " << 
+                    __LINE__ << ": task " << data.get() << " suspend test_task_future::handle from " << (data ? data->status : -1) <<
                     ", wait for " << h.address() << std::endl;
 
             }
