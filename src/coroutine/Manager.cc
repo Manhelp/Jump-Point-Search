@@ -13,9 +13,12 @@ thread_manager::thread_manager() {
 coroutine_task thread_manager::async_task() {
     // generator
     auto index = m_global_index;
-    // std::cout << " begin run " << index << " thread id " << std::this_thread::get_id() << std::endl;
+   
+    if(index % 1000000 == 0) {
+            std::cout << " begin run " << index << " thread id " << std::this_thread::get_id() << std::endl;
+        }
     co_await thread_manager::await_suspend_handle(*this);
-
+    // std::cout << " continue run " << index << " thread id " << std::this_thread::get_id() << std::endl;
     auto itor = m_main_handles.find(index);
     if(itor != m_main_handles.end()) {
         if(index % 1000000 == 0) {
@@ -57,7 +60,6 @@ void thread_manager::main_thread_worker(thread_manager* manager) {
             }
             manager->m_main_handles.clear();
         }
-            
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
