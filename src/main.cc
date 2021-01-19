@@ -94,11 +94,10 @@ int main(int argc, char* argv[])
     std::cout << '\n';
     */
 
+    std::cout << "1" << " thread id " << std::this_thread::get_id() << std::endl;
 
-    thread_manager main_manager;
+    thread_manager::instance();
     
-
-    std::cout << "--------------" << std::endl;
 
     // main thread
     while(true) {
