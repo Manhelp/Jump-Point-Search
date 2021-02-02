@@ -73,28 +73,67 @@ int main(int argc, char* argv[])
     std::cout << "hardware_concurrency=" << std::thread::hardware_concurrency() << std::endl;
 
     /*
-    // tutorial
-    // 创建一个任务
-    test_task::ptr_t task = std::make_shared<test_task>(3);
-    // 运行任务
-    auto fut = g(task);
-    // 模拟从外部获取数据然会恢复协程
-    while (!fut.done()) {
-        test_rpc_manager_run();
-    }
+        // tutorial
+        // 创建一个任务
+        test_task::ptr_t task = std::make_shared<test_task>(3);
+        // 运行任务
+        auto fut = g(task);
+        // 模拟从外部获取数据然会恢复协程
+        while (!fut.done()) {
+            test_rpc_manager_run();
+        }
     */
     // switch to new thread
     // resuming_on_new_thread();
 
     // generator
     /*
-    for (int i : range(-4, 8)) {
-        std::cout << i << ' ';
-    }
-    std::cout << '\n';
+        for (int i : range(-4, 8)) {
+            std::cout << i << ' ';
+        }
+        std::cout << '\n';
     */
 
+    /*
+        A* a = new A();
+        B* b = new B();
+
+        AA* aa = new AA();
+        BB* bb = new BB();
+        CBA* cba = new CBA();
+
+        A* a_a = (A*)aa;
+        B* b_b = (B*)bb;
+        A* a_ab = (A*)cba;
+        B* b_ab = (B*)cba;
+        Base* base_ab = (Base*)cba;
+
+        std::cout << "Base len = " << sizeof(Base) << " sizeof(std::size_t)=" << sizeof(std::size_t) << std::endl;
+        std::cout << "std::aligned_storage<48>::type = " << sizeof(std::aligned_storage<48>::type) << std::endl;
+
+        if(cba->iscoro()) {
+            std::cout << "cba iscoro" << std::endl;
+        } else
+        {
+            std::cout << "cba not iscoro" << std::endl;   
+        }
+
+        
+        if(base_ab->iscoro()) {
+            std::cout << "base iscoro" << std::endl;
+        } else
+        {
+            std::cout << "base not iscoro" << std::endl;   
+        }
+
+    */
+    	
+
+    
+
+    std::cout << "--------------------------------------------------------------------" << std::endl;
     std::cout << "1" << " thread id " << std::this_thread::get_id() << std::endl;
+
 
     thread_manager::instance();
     

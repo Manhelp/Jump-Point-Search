@@ -31,15 +31,17 @@ include_directories(
     ${SOLUTION_DIR}
     ${SOLUTION_DIR}/coroutine
     ${SOLUTION_DIR}/jps
+    ${SOLUTION_DIR}/lua
 )
 
 add_subdirectory(${SOLUTION_DIR}/coroutine)
 add_subdirectory(${SOLUTION_DIR}/jps)
+add_subdirectory(${SOLUTION_DIR}/lua)
 
 aux_source_directory(src SRC_DIR)
 
 add_executable(jpsfinder ${SRC_DIR})
-target_link_libraries(jpsfinder coroutine jps ${THIRD_LIB_DIR})
+target_link_libraries(jpsfinder coroutine jps lua ${THIRD_LIB_DIR})
 
 
 install(TARGETS jpsfinder DESTINATION ${CMAKE_INSTALL_PREFIX})

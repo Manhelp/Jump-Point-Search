@@ -10,10 +10,46 @@
 #include <memory>
 #include <list>
 #include "Singleton.h"
+#include <functional>
+
+struct Base
+{
+    int* base = nullptr;
+    std::aligned_storage<32>::type m_instance_buffer;
+    Base* m_classrep; // the class information about this object's type
+    std::size_t m_dependency_cnt; // counts dependencies
+    
+    bool iscoro() { return false; }
+};
+
+struct A : public Base
+{
+    int a = 0;
+};
+struct B : public A
+{
+    int handle = 0;
+    bool iscoro() { return true; }
+};
+
+
+struct CBA : public B
+{
+    int cba = 1;
+};
+
+struct AA : public A
+{
+    int aa = 0;
+};
+struct BB : public B {
+    int bb = 0;
+};
 
 struct jthread_awaitable;
 
-typedef void (*async_func)();
+// typedef void (*async_func)();
+#define async_func std::function<void()>
 struct result_data {
     int64_t m_index;
     int64_t m_data;

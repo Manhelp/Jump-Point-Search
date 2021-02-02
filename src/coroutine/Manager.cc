@@ -45,14 +45,22 @@ void loadDataFromMysql()
 
 coroutine_task update()
 {
+
+    std::cout << " sizeof(std::coroutine_handle<>) " << sizeof(std::coroutine_handle<>) << std::endl;
+
     std::cout << " startCoroutine(loadDataFromMysql) "  << " thread id " << std::this_thread::get_id() << std::endl;
-    co_await startCoroutine(loadDataFromMysql);
+
+
+    int a;
+    co_await startCoroutine([&](){
+        std::cout << " loadDataFromMysql "  << " thread id " << std::this_thread::get_id() << std::endl;
+    });
 
     setValue(1000);
 
     std::cout << " startCoroutine(doSomeThing) "  << " thread id " << std::this_thread::get_id() << std::endl;
     
-    co_await startCoroutine(doSomeThing);
+    // co_await startCoroutine(doSomeThing);
 
     addValue(100);
 }
